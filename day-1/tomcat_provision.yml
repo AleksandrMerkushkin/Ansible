@@ -1,0 +1,69 @@
+--- # Installing tomcat
+- hosts: host1
+  become: yes
+  become_method: sudo
+  vars:
+    tomcat_version: 8.5.9
+    java_version: 11
+    user: tomcat
+  tasks:
+
+  - name: installing java
+    yum:
+      name: java-11-openjdk-devel
+
+  - name: adding group tomcat
+    group:
+      name: '{{user}}'
+
+  - name: adding user tomcat
+    user:
+      name: '{{user}}'
+      group: '{{user}}'
+
+  - name: downloading tomcat
+    get_url:
+      url: "http://archive.apache.org/dist/tomcat/tomcat-8/v{{tomcat_version}}/bin/apache-tomcat-{{tomcat_version}}.tar.gz" 
+      dest: "/tmp/apache-tomcat-{{tomcat_version}}.tar.gz"
+      owner: '{user}'
+
+  - name: creating directory
+    file:
+      path: "/opt/tomcat"
+      state: directory
+      mode: 0755
+      owner: '{{user}}' 
+
+  - name: untar tomcat
+    unarchive:
+      src: "/tmp/apache-tomcat-{{tomcat_version}}.tar.gz"
+      dest: /opt/
+      remote_src: yes
+  
+  - name: move tomcat
+    shell:      
+      mv /opt/apache-tomcat-{{tomcat_version}} /opt/tomcat
+  
+  - name: change owner
+    ansible.builtin.file:
+      path: "/opt/tomcat"
+      owner: '{{user}}'
+      group: '{{user}}'
+      mode: '0755'
+      state: directory
+      recurse: yes    
+  
+  - name: nano/etc/systemd/system/tomcat.service
+    shell:
+      echo -e '[Unit] \nDescription=Apache Tomcat 8 Servlet Container \nAfter=syslog.target network.target \n[Service] \nUser=tomcat \nGroup=tomcat \nType=forking \nEnvironment=CATALINA_PID=/opt/tomcat/apache-tomcat-{{tomcat_version}}/tomcat.pid \nEnvironment=CATALINA_HOME=/opt/tomcat/apache-tomcat-{{tomcat_version}} \nEnvironment=CATALINA_BASE=/opt/tomcat/apache-tomcat-{{tomcat_version}} \nExecStart=/opt/tomcat/apache-tomcat-{{tomcat_version}}/bin/startup.sh \nExecStop=/opt/tomcat/apache-tomcat-{{tomcat_version}}/bin/shutdown.sh \nRestart=on-failure \n[Install] \nWantedBy=multi-user.target' >> /etc/systemd/system/tomcat.service
+     
+  - name: Run tomcat
+    ansible.builtin.systemd: 
+      state: started 
+      daemon_reload: yes      
+      name: tomcat
+
+  - name: Enable tomcat
+    ansible.builtin.systemd:
+      name: tomcat
+      enabled: yes
