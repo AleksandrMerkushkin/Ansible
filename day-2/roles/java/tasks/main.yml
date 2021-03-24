@@ -1,0 +1,7 @@
+---
+# tasks file for java
+- name: Java installed
+  yum: name=java-{{java_version}}-openjdk
+  become: yes
+  notify:
+    - save java details

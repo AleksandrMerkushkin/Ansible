@@ -1,0 +1,6 @@
+[control-machine]
+192.168.33.70 ansible_connection=local
+
+[nodes]
+
+host1 ansible_host=192.168.33.15 ansible_port=22 ansible_user=vagrant ansible_connection=ssh role_path="/home/vagrant/ansible/day-2/roles/"

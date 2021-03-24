@@ -1,0 +1,8 @@
+---
+# vars file
+java_version: 11
+
+user_name: tomcat
+tomcat_version: 8.5.9
+tomcat_home: /opt/tomcat/
+http_port: 8080

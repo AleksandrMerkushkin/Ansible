@@ -1,0 +1,12 @@
+- name: installing java tomcat nginx
+  hosts: nodes
+  gather_facts: yes
+  fact_path: /home/ansible/day-2/.facts.d
+
+  roles:
+  - java
+  - java_test
+  - nginx
+  - nginx_test
+  - tomcat
+  - tomcat_test

@@ -1,0 +1,17 @@
+---
+# tasks file for nginx
+- name: Ensure Nginx Installed
+  yum: name=nginx
+  notify:
+    - save nginx details 
+  become: yes
+
+- name: copy tomcat.conf.j2
+  template:
+    src: tomcat.conf.j2
+    dest: /etc/nginx/conf.d/tomcat.conf
+  become: yes
+
+- name: Ensure Nginx Service Running and Enabled
+  service: name=nginx state=started enabled=yes
+  become: yes

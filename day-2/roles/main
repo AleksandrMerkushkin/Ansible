@@ -1,0 +1,47 @@
+--- # Installing tomcat
+- hosts: host1
+  become: yes
+  become_method: sudo
+  tasks:
+
+  - name: adding group tomcat
+      group:
+        name: '{{tomcat_group}}'
+	
+  - name: adding user tomcat
+      user:
+        name: '{{tomcat_user}}'
+        group: '{{tomcat_group}}'
+	
+  - name: downloading tomcat
+    get_url:
+      url: "http://archive.apache.org/dist/tomcat/tomcat-8/v{{tomcat_version}}/bin/apache-tomcat-{{tomcat_version}}.tar.gz" 
+      dest: /tmp/apache-tomcat-{{tomcat_version}}.tar.gz
+	
+  - name: creating directory
+    file:
+      path: '{{tomcat_home}}'
+      state: directory
+      mode: 0755
+      owner: '{{tomcat_user}}'
+      group: '{{tomcat_group}}'
+      recurse: yes
+      become: yes
+
+  - name: untar tomcat
+    unarchive:
+      src: /tmp/apache-tomcat-{{tomcat_version}}.tar.gz
+      dest: '{{tomcat_home}}'
+      owner: '{{tomcat_user}}'
+      group: '{{tomcat_group}}'
+      remote_src: yes
+      become: yes
+    
+  - name: nano/etc/systemd/system/tomcat.service
+    shell:
+      echo -e '[Unit] \nDescription=Apache Tomcat 8 Servlet Container \nAfter=syslog.target network.target \n[Service] \nUser=tomcat \nGroup=tomcat \nType=forking \nEnvironment=CATALINA_PID=/opt/tomcat/apache-tomcat-{{tomcat_version}}/tomcat.pid \nEnvironment=CATALINA_HOME=/opt/tomcat/apache-tomcat-{{tomcat_version}} \nEnvironment=CATALINA_BASE=/opt/tomcat/apache-tomcat-{{tomcat_version}} \nExecStart=/opt/tomcat/apache-tomcat-{{tomcat_version}}/bin/startup.sh \nExecStop=/opt/tomcat/apache-tomcat-{{tomcat_version}}/bin/shutdown.sh \nRestart=on-failure \n[Install] \nWantedBy=multi-user.target' >> /etc/systemd/system/tomcat.service
+	     
+  - name: start and enable tomcat
+      service: name=tomcat state=started enabled=yes
+      daemon_reload: yes
+      become: yes
