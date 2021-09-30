@@ -53,7 +53,7 @@ Second (and other) run(s) of playbook shouldn’t interrupt the service – one 
 8.6	If previous steps are done successfully, instructor will check the report
 9.	Feedback: report issues/problems you had during the development of playbook and time spent for development.
 
-# Day-2
+# day-2
 Labwork 02. Web Server Provisioning
 Review
 Using Ansible v2.2.1 for provisioning nginx + tomcat application stack. 
